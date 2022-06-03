@@ -18,8 +18,9 @@ Create an sqlite database with the following script
 CREATE TABLE IF NOT EXISTS "sources" (
 	"userid"	TEXT NOT NULL,
 	"url"	TEXT NOT NULL,
+	"alias"	TEXT NOT NULL,
 	"last_updated"	INTEGER NOT NULL,
-	PRIMARY KEY("url","userid")
+	PRIMARY KEY("alias", "url", "userid")
 );
 ```
 
@@ -59,8 +60,8 @@ python bot.py
 Bot commands
 ============
 
-* `/add feedurl` to add a new RSS/Atom feed.
-* `/remove feedurl` to remove an RSS/Atom feed subscription.
+* `/add feedurl feedalias` to add a new RSS/Atom feed.
+* `/remove feedurl or /remove feedalias` to remove an RSS/Atom feed subscription.
 * `/list` to list alll subscribed feeds.
 * `/help` to get the help
 * `/archive` to archive a given link in archive.org

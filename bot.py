@@ -21,30 +21,33 @@ logger = logging.getLogger(__name__)
 def add_feed(update: Update, context: CallbackContext) -> None:
     user = update.effective_chat.id
     source = context.args[0]
-    # /add https://thegradient.pub/rss
+    source_alias = context.args[1]
+    # /add https://thegradient.pub/rss thegradient
     if is_already_present(user, source):
         context.bot.send_message(
-            chat_id=update.effective_chat.id, text=source + ' already exists.')
+            chat_id=update.effective_chat.id, text=source_alias + ' already exists.')
     else:
-        add_feed_source(user, source)
+        add_feed_source(user, source, source_alias)
         feed_info = get_feed_info(source)
         context.bot.send_message(
-            chat_id=update.effective_chat.id, text=source + ' added.')
+            chat_id=update.effective_chat.id, text=source_alias + ' added.')
         context.bot.send_message(
             chat_id=update.effective_chat.id, text=feed_info)
 
 
 def remove_feed(update: Update, context: CallbackContext) -> None:
     user = update.effective_chat.id
-    source = context.args[0]
+    source_or_alias = context.args[0]
     # /remove https://thegradient.pub/rss
-    if is_already_present(user, source):
-        remove_feed_source(user, source)
+    # OR
+    # /remove thegradient
+    if is_already_present(user, source_or_alias):
+        remove_feed_source(user, source_or_alias)
         context.bot.send_message(
-            chat_id=update.effective_chat.id, text=source + ' removed.')
+            chat_id=update.effective_chat.id, text=source_or_alias + ' removed.')
     else:
         context.bot.send_message(
-            chat_id=update.effective_chat.id, text=source + ' does not exist.')
+            chat_id=update.effective_chat.id, text=source_or_alias + ' does not exist.')
 
 
 def list_feeds(update: Update, context: CallbackContext) -> None:
@@ -66,13 +69,13 @@ def archive_link(update: Update, context: CallbackContext):
 def text(update: Update, context: CallbackContext) -> None:
     user = update.effective_chat.id
     context.bot.send_message(
-        chat_id=user, text='To add a feed use /add feedurl')
+        chat_id=user, text='To add a feed use /add feedurl feedalias')
 
 
 def help(update: Update, context: CallbackContext) -> None:
     user = update.effective_chat.id
     context.bot.send_message(
-        chat_id=user, text='To add a feed use /add feedurl')
+        chat_id=user, text='To add a feed use /add feedurl feedalias')
 
 
 def hello(update: Update, context: CallbackContext) -> None:
@@ -90,8 +93,8 @@ def fetch_feeds(context: CallbackContext):
     filter_words = os.getenv('EXCLUDE_WORDS').splitlines()
     for source in sources:
         feeds = read_feed(source["url"], filter_words)
-        logger.info(msg="Found " + str(len(feeds)) +
-                    " feeds from " + source["url"])
+        logger.info(msg=f'Found {len(feeds)} feeds from {source["alias"]} <{source["url"]}>')
+
         entry_index = 0
         last_post_updated_time= 0
         for entry in feeds:
