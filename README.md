@@ -62,6 +62,6 @@ Bot commands
 
 * `/add feedurl feedalias` to add a new RSS/Atom feed.
 * `/remove feedurl or /remove feedalias` to remove an RSS/Atom feed subscription.
-* `/list` to list alll subscribed feeds.
+* `/list` to list all subscribed feeds.
 * `/help` to get the help
-* `/archive` to archive a given link in archive.org
+* `/pull` to update added feeds

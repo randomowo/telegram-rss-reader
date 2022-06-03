@@ -99,7 +99,15 @@ def text(update: Update, context: CallbackContext) -> None:
 def help(update: Update, context: CallbackContext) -> None:
     user = update.effective_chat.id
     context.bot.send_message(
-        chat_id=user, text='To add a feed use /add feedurl feedalias')
+        chat_id=user,
+        text='''RSS tg bot commands:
+/add [url] [alias] - add new feed
+/remove [url | alias] - remove added feed
+/list - list added feeds
+/help - see this help
+/pull - update feeds now
+'''
+    )
 
 
 def hello(update: Update, context: CallbackContext) -> None:
@@ -111,6 +119,12 @@ def error(update, context):
     logger.error(msg="Exception while handling an update:",
                  exc_info=context.error)
 
+def pull(update: Update, context: CallbackContext) -> None:
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text='pulling sources...'
+    )
+    fetch_feeds(context)
 
 def fetch_feeds(context: CallbackContext):
     sources = get_all_sources()
@@ -154,12 +168,13 @@ def main():
     updater = Updater(os.getenv('TELEGRAM_BOT_TOKEN'))
     dispatcher = updater.dispatcher
 
-    dispatcher.add_handler(CommandHandler('hello', hello))
+    #dispatcher.add_handler(CommandHandler('hello', hello))
     dispatcher.add_handler(CommandHandler("help", help))
     dispatcher.add_handler(CommandHandler('add', add_feed))
     dispatcher.add_handler(CommandHandler('remove', remove_feed))
     dispatcher.add_handler(CommandHandler('list', list_feeds))
-    dispatcher.add_handler(CommandHandler('archive', archive_link))
+    #dispatcher.add_handler(CommandHandler('archive', archive_link))
+    dispatcher.add_handler(CommandHandler('pull', pull))
 
     # add an handler for normal text (not commands)
     dispatcher.add_handler(MessageHandler(Filters.text, text))
