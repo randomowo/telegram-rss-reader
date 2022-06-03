@@ -133,12 +133,8 @@ def fetch_feeds(context: CallbackContext):
         feeds = read_feed(source["url"], filter_words)
         logger.info(msg=f'Found {len(feeds)} feeds from {source["alias"]} <{source["url"]}>')
 
-        entry_index = 0
         last_post_updated_time= 0
-        for entry in feeds:
-            entry_index = entry_index+1
-            if entry_index > 10:
-                break
+        for entry in feeds[:10]:
             if entry.has_key('published_parsed'):
                 post_updated_time = int(time.strftime(
                     "%Y%m%d%H%M%S", entry.published_parsed))
@@ -147,7 +143,8 @@ def fetch_feeds(context: CallbackContext):
                     "%Y%m%d%H%M%S", entry.updated_parsed))
             else:
                 logger.error(msg=source["url"] + " has no time info")
-                break
+                continue
+
             last_updated_time = int(source["last_updated"])
             if post_updated_time > last_post_updated_time:
                 last_post_updated_time = post_updated_time
