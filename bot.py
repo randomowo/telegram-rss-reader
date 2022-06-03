@@ -20,15 +20,30 @@ logger = logging.getLogger(__name__)
 
 def add_feed(update: Update, context: CallbackContext) -> None:
     user = update.effective_chat.id
+    if len(context.args) < 2:
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text='You should provide url and its alias'
+        )
+        return
     source = context.args[0]
-    source_alias = context.args[1]
+    source_alias = ' '.join(context.args[1:])
     # /add https://thegradient.pub/rss thegradient
     if is_already_present(user, source):
         context.bot.send_message(
             chat_id=update.effective_chat.id, text=source_alias + ' already exists.')
     else:
+        try:
+            feed_info = get_feed_info(source)
+        except Exception as e:
+            context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=f'Cannot fetch feed <{source}> info'
+            )
+            logger.error(msg=str(e))
+            return
+
         add_feed_source(user, source, source_alias)
-        feed_info = get_feed_info(source)
         context.bot.send_message(
             chat_id=update.effective_chat.id, text=source_alias + ' added.')
         context.bot.send_message(
@@ -37,6 +52,12 @@ def add_feed(update: Update, context: CallbackContext) -> None:
 
 def remove_feed(update: Update, context: CallbackContext) -> None:
     user = update.effective_chat.id
+    if not len(context.args):
+        context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text='You sould provide url or alias of added feed'
+        )
+        return
     source_or_alias = context.args[0]
     # /remove https://thegradient.pub/rss
     # OR
@@ -62,6 +83,9 @@ def list_feeds(update: Update, context: CallbackContext) -> None:
 
 def archive_link(update: Update, context: CallbackContext):
     user = update.effective_chat.id
+    if not len(context.args[0]):
+        context.bot.send_message(chat_id=user, text='You should provide url')
+        return
     source = context.args[0]
     url, captured = capture(source)
     context.bot.send_message(chat_id=user, text=url)
