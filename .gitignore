@@ -4,3 +4,4 @@
 ENV_DIR
 *.sqbpro
 __pycache__
+.venv
